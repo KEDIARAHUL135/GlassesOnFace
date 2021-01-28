@@ -7,8 +7,8 @@ from matplotlib import pyplot as plt
 
 #LandmarkIndex = [36, 40, 42, 45, 33, 60, 64]
 #Landmark_to_Glasses_Coords = np.array([[417, 477], [516, 477], [615, 477], [715, 477], [576, 598], [544, 708], [632, 708]], np.float32)
-LandmarkIndex = [36, 60, 64]
-Landmark_to_Glasses_Coords = np.array([[417, 477], [544, 708], [632, 708]], np.float32)
+LandmarkIndex = [36, 42, 64]
+Landmark_to_Glasses_Coords = np.array([[417, 477], [615, 477], [632, 708]], np.float32)
 
 
 def ReadImage(InputImagePath):
@@ -87,9 +87,22 @@ def TransformImage(Image, Landmarks, a, b):
     HomographyMatrix = cv2.getAffineTransform(Landmark_to_Glasses_Coords, Landmarks)
     
     # Transforming the image
-    TransformedImage = cv2.warpAffine(Image, HomographyMatrix, (a, b))
+    TransformedImage = cv2.warpAffine(Image, HomographyMatrix, (b, a))
 
     return TransformedImage
+
+
+def OverlapImages(BaseImage, SecImage):
+    # Separating the mask
+    Mask = SecImage[:, :, -1]
+    Mask = cv2.cvtColor(Mask, cv2.COLOR_GRAY2BGR)
+    SecImage = SecImage[:, :, :-1]
+
+    # Overlaping the images
+    BaseImage = cv2.bitwise_and(BaseImage, cv2.bitwise_not(Mask))
+    OverlapedImage = cv2.bitwise_or(BaseImage, cv2.bitwise_and(SecImage, Mask))
+
+    return OverlapedImage
 
 
 if __name__ == "__main__":
@@ -111,3 +124,8 @@ if __name__ == "__main__":
         for Landmarks in FaceLandmarks:
             # Transforming glasses image for overlap
             TransformedGlassesImage = TransformImage(GlassesImage.copy(), Landmarks, Image.shape[0], Image.shape[1])
+
+            Image = OverlapImages(Image, TransformedGlassesImage)
+
+        plt.imshow(Image[:, :, ::-1])
+        plt.show()
