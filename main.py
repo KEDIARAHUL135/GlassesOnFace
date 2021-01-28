@@ -5,6 +5,9 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 
+LandmarkIndex = [36, 40, 42, 45, 33, 60, 64]
+Landmark_to_Glasses_Coords = [[417, 477], [516, 477], [615, 477], [715, 477], [576, 598], [544, 708], [632, 708]]
+
 def ReadImage(InputImagePath):
     Images = []                     # Input Images will be stored in this list.
     ImageNames = []                 # Names of input images will be stored in this list.
@@ -70,6 +73,11 @@ def FaceLandmarkDetection(Image):
     return All_Faces_Landmarks
 
 
+def ExtractRequiredLandmarks(FaceLandmarks):
+    FinalFaceLandmarks = [Landmarks[LandmarkIndex] for Landmarks in FaceLandmarks]
+    return FinalFaceLandmarks
+
+
 if __name__ == "__main__":
     # Reading images with glasses to be overlaped and the face images
     GlassesImage = cv2.imread("PipeAndFace.png", cv2.IMREAD_UNCHANGED)
@@ -81,3 +89,8 @@ if __name__ == "__main__":
 
         # Detecting face landmarks
         FaceLandmarks = FaceLandmarkDetection(Image)
+
+        # Extracting the required landmarks for the problem.
+        FaceLandmarks = ExtractRequiredLandmarks(FaceLandmarks)
+
+        
