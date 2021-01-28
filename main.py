@@ -1,5 +1,6 @@
 import os
 import cv2
+import dlib
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -38,13 +39,35 @@ def ReadImage(InputImagePath):
     return Images, ImageNames
         
 
+def FaceDetection(Image):
+    # Converting to grayscale
+    Image_Gray = cv2.cvtColor(Image, cv2.COLOR_BGR2GRAY)
+
+    # Reading cascade classifier file
+    Face_Cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+
+    # Detecting faces
+    Faces = Face_Cascade.detectMultiScale(Image_Gray, 1.3, 5)
+
+    # Returning faces
+    return Faces
+
 
 if __name__ == "__main__":
-
+    # Reading images with glasses to be overlaped and the face images
     GlassesImage = cv2.imread("PipeAndFace.png", cv2.IMREAD_UNCHANGED)
     Images, ImageNames = ReadImage("FaceImages")
 
+    # Looping over face images and processing them
     for i in range(len(Images)):
         Image = Images[i]
 
-        # Continue with code here
+        # Detecting faces in the image.
+        Faces = FaceDetection(Image)
+
+        for face in Faces:
+            (x, y, w, h) = face
+            Image = cv2.rectangle(Image, (x, y), (x+w, y+h), (0, 255, 0), 3)
+
+        plt.imshow(Image[:, :, ::-1])
+        plt.show()
