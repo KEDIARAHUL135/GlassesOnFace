@@ -5,8 +5,11 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 
-LandmarkIndex = [36, 40, 42, 45, 33, 60, 64]
-Landmark_to_Glasses_Coords = [[417, 477], [516, 477], [615, 477], [715, 477], [576, 598], [544, 708], [632, 708]]
+#LandmarkIndex = [36, 40, 42, 45, 33, 60, 64]
+#Landmark_to_Glasses_Coords = np.array([[417, 477], [516, 477], [615, 477], [715, 477], [576, 598], [544, 708], [632, 708]], np.float32)
+LandmarkIndex = [36, 60, 64]
+Landmark_to_Glasses_Coords = np.array([[417, 477], [544, 708], [632, 708]], np.float32)
+
 
 def ReadImage(InputImagePath):
     Images = []                     # Input Images will be stored in this list.
@@ -63,9 +66,9 @@ def FaceLandmarkDetection(Image):
         Landmarks = Predictor(Image_Gray, Rect)
 
         # Extracting landmark coordinates from Landmarks detected
-        Landmark_Coords = np.zeros((68, 2), dtype=int)  # As 68 landmarks are detected
+        Landmark_Coords = np.zeros((68, 2), dtype=np.float32)  # As 68 landmarks are detected
         for i in range(68):
-            Landmark_Coords[i] = (Landmarks.part(i).x, Landmarks.part(i).y)
+            Landmark_Coords[i] = np.array([Landmarks.part(i).x, Landmarks.part(i).y], np.float32)
 
         # Storing the landmarks of the faces
         All_Faces_Landmarks.append(Landmark_Coords)
@@ -76,6 +79,17 @@ def FaceLandmarkDetection(Image):
 def ExtractRequiredLandmarks(FaceLandmarks):
     FinalFaceLandmarks = [Landmarks[LandmarkIndex] for Landmarks in FaceLandmarks]
     return FinalFaceLandmarks
+
+
+def TransformImage(Image, Landmarks, a, b):
+    # Finding homography matrix
+    #(HomographyMatrix, Status) = cv2.findHomography(Landmark_to_Glasses_Coords, Landmarks, cv2.RANSAC, 4.0)
+    HomographyMatrix = cv2.getAffineTransform(Landmark_to_Glasses_Coords, Landmarks)
+    
+    # Transforming the image
+    TransformedImage = cv2.warpAffine(Image, HomographyMatrix, (a, b))
+
+    return TransformedImage
 
 
 if __name__ == "__main__":
@@ -94,3 +108,6 @@ if __name__ == "__main__":
         FaceLandmarks = ExtractRequiredLandmarks(FaceLandmarks)
 
         
+        for Landmarks in FaceLandmarks:
+            # Transforming glasses image for overlap
+            TransformedGlassesImage = TransformImage(GlassesImage.copy(), Landmarks, Image.shape[0], Image.shape[1])
