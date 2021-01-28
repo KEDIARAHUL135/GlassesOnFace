@@ -39,6 +39,37 @@ def ReadImage(InputImagePath):
     return Images, ImageNames
         
 
+def FaceLandmarkDetection(Image):
+    # Initializing dlib's face detector (HOG-based) and then creating
+    # the facial landmark predictor
+    Detector = dlib.get_frontal_face_detector()
+    Predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
+
+    # Converting image to grayscale
+    Image_Gray = cv2.cvtColor(Image, cv2.COLOR_BGR2GRAY)
+
+    # Detecting faces in the image
+    Rects = Detector(Image_Gray, 2)
+
+    # Landmarks of all the faces will be stored in this variable
+    All_Faces_Landmarks = []
+
+    # Looping over the faces detected
+    for (i, Rect) in enumerate(Rects):
+        # Predicting facing landmarks
+        Landmarks = Predictor(Image_Gray, Rect)
+
+        # Extracting landmark coordinates from Landmarks detected
+        Landmark_Coords = np.zeros((68, 2), dtype=int)  # As 68 landmarks are detected
+        for i in range(68):
+            Landmark_Coords[i] = (Landmarks.part(i).x, Landmarks.part(i).y)
+
+        # Storing the landmarks of the faces
+        All_Faces_Landmarks.append(Landmark_Coords)
+
+    return All_Faces_Landmarks
+
+
 if __name__ == "__main__":
     # Reading images with glasses to be overlaped and the face images
     GlassesImage = cv2.imread("PipeAndFace.png", cv2.IMREAD_UNCHANGED)
@@ -47,3 +78,6 @@ if __name__ == "__main__":
     # Looping over face images and processing them
     for i in range(len(Images)):
         Image = Images[i]
+
+        # Detecting face landmarks
+        FaceLandmarks = FaceLandmarkDetection(Image)
