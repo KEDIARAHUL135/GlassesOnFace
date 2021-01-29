@@ -5,10 +5,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 
-#LandmarkIndex = [36, 40, 42, 45, 33, 60, 64]
-#Landmark_to_Glasses_Coords = np.array([[417, 477], [516, 477], [615, 477], [715, 477], [576, 598], [544, 708], [632, 708]], np.float32)
-LandmarkIndex = [36, 42, 64]
-Landmark_to_Glasses_Coords = np.array([[417, 477], [615, 477], [632, 708]], np.float32)
+LandmarkIndex = [36, 45, 66]
+Landmark_to_Glasses_Coords = np.array([[431, 494], [712, 495], [593, 718]], np.float32)
 
 
 def ReadImage(InputImagePath):
@@ -127,5 +125,5 @@ if __name__ == "__main__":
 
             Image = OverlapImages(Image, TransformedGlassesImage)
 
-        plt.imshow(Image[:, :, ::-1])
-        plt.show()
+        cv2.imwrite("OutputImages/" + ImageNames[i], Image)
+
